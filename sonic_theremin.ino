@@ -1,4 +1,5 @@
 #include <SoftwareSerial.h>
+#include <math.h>
 
 #define PIN_BUTTON      8    // BUTTON
 #define PIN_BUZZER      9    // PIEZO buzzer
@@ -8,6 +9,17 @@
 // HDUS-007 ultra-sonic distance sensor
 SoftwareSerial hdus007(10, 11); // RX, TX
 int hdus007_getDistance(void);
+
+unsigned int midi2freq(uint8_t m) // m is 0 ~ 127
+{
+  double t = pow(2, m / 12);
+  unsigned int hz = 440 * t;
+
+  // Human can hear 20Hz ~ 20kHz
+  // this converter makes 8Hz ~ 12.5kHz
+
+  return hz;
+}
 
 void setup()
 {
@@ -59,5 +71,12 @@ int hdus007_getDistance(void)
       distance = (distH << 8) | distL;
     }
   }
+
+  // HDUS-007 can measure 30mm ~ 2000mm
+  if (distance > 0) {
+    if (distance < 30) distance = 30;
+    if (distance > 2000) distance = 2000;
+  }
+
   return distance;
 }
